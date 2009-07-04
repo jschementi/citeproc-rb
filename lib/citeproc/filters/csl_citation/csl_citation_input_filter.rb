@@ -89,17 +89,20 @@ module CSL
       case variable
       when "issued"
         convert_date(@current_citation.date_issued)
-      when "event" # Kludgy way of handling event - treat as presentation
-        # @current_citation.presented_at.time.start if @current_citation.presented_at and @current_citation.presented_at.time
+      when "event"
+        convert_date(@current_citation.date_event)
       when "accessed"
         convert_date(@current_citation.date_accessed)
       when "container"
-        # @current_citation.belongs_to.date if @current_citation.belongs_to
+        convert_date(@current_citation.date_container)
+      when "original-date"
+        convert_date(@current_citation.original_date)
       end
     end
     
     def convert_date(date)
       if date
+        date = date.to_s
         date = date + "-01-01" if date.length == 4
         Date.parse(date)
       end
@@ -116,7 +119,15 @@ module CSL
         locator_type = variable
       else
         locator_type = @current_citation.locator_type
-        case @current_citation.locator_type
+        locator = case @current_citation.locator_type
+        when 'version'
+          @current_citation.version
+        when 'chapter-number'
+          @current_citation.chapter_number
+        when 'number'
+          @current_citation.number
+        when 'url'
+          @current_citation.url
         when 'issue'
           singular = (@current_citation.issue and @current_citation.issue.include?('-'))
         when 'page'
@@ -126,22 +137,21 @@ module CSL
         else 
           singular = (@current_citation.locator and @current_citation.locator.include?('-'))
         end
+        singlular = locator and locator.include?('-')
       end
       return locator_type,  singular
     end
 
 
-    
     def extract_variable(variable)
       case variable
-    
-      ## the primary title for the cited item
+
       when 'author'
         @current_citation.authors
-    
+
       when 'editor'
         @current_citation.editors
-    
+
       ## the primary title for the cited item
       when 'title'
         @current_citation.title
@@ -262,13 +272,48 @@ module CSL
 
       ##
       when "ISBN"
-        @current_citation.isbn10
-        
-        
+        @current_citation.isbn
+
+      ##
+      when "call-number"
+        @current_citation.call_number
+
+      ##
+      when "citation-label"
+        @current_citation.citation_label
+
+      ##
+      when "citation-number"
+        @current_citation.citation_number
+
+      ##
+      when "collection-number"
+        @current_citation.collection_number
+
+      ##
+      when "first-reference-note-number"
+        @current_citation.first_reference_note_number
+
+      ##
+      when "genre"
+        @current_citation.genre
+
+      ##
+      when "references"
+        @current_citation.references
+
+      ##
+      when "section"
+        @current_citation.section
+
+      ##
+      when "year-suffix"
+        @current_citation.year_suffix
+
       else
         extract_date(variable)
       end
-      
+
     end
   end
 end

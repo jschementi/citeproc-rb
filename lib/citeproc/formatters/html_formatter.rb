@@ -14,7 +14,7 @@
  
 module Citeproc
   
-  class XhtmlFormatter
+  class HtmlFormatter
     
     def format(node)
       result = ''
@@ -48,26 +48,13 @@ module Citeproc
       results = ''
 			
       text_content = format_text(text, formatter.text_case)
-      already_spanned = text_content.starts_with?("<span") and text_content.ends_with?("</span>")
+      already_spanned = text_content.starts_with?("<") and text_content.ends_with?(">")
 
       
       if !already_spanned
-        # Note: these attributes should only apply to certain kinds of formatters, i.e. those based on mark-up 
-        results << '<span' # Could be block/inline/div - needs to be conditional on both 'display' attribute and mark-up variant (XHTML, XSL-FO)
-        style = ''
-        style << "font-family: #{formatter.font_family}; " if formatter.font_family
-        style << "font-style: #{formatter.font_style}; " if formatter.font_style
-        style << "font-variant: #{formatter.font_variant}; " if formatter.font_variant
-        style << "font-weight: #{formatter.font_weight}; " if formatter.font_weight
-        style << "text-decoration: #{formatter.text_decoration}; " if formatter.text_decoration
-        style << "text-transform: #{formatter.text_transform}; " if formatter.text_transform
-        style << "vertical-align: #{formatter.vertical_align}; " if formatter.vertical_align
-        style << "enforce-case: #{formatter.enforce_case}; " if formatter.enforce_case
-        display = formatter.formatting[:display.to_s]
-        style << "display: #{display}; " if display
-        style << "quotes: #{formatter.quotes}; " if formatter.quotes 
-        results << %Q' style="#{style}"' if !style.empty?
-        results << ">"
+        results << "<b>" if formatter.font_weight
+        results << "<u>" if formatter.text_decoration
+        results << "<i>" if formatter.font_style
       end
 
       results << formatter.prefix if formatter.prefix and !text.start_with?(formatter.prefix)
@@ -80,7 +67,9 @@ module Citeproc
       results << formatter.suffix if formatter.suffix and !text.end_with?(formatter.suffix)
       
 			if !already_spanned
-	      results << "</span>"
+	      results << "</i>" if formatter.font_style
+        results << "</u>" if formatter.text_decoration
+        results << "</b>" if formatter.font_weight
 			end
 
       results

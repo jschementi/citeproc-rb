@@ -14,28 +14,39 @@
 #
 
 module CSL
-  
+
   # ---------- Classes -----------
 
-  
+
   # Defines the Citation class
   class Citation
+
+    def self.transform_variable(var)
+      tvar = var.gsub(/-/, '_')
+      if Citeproc::VARIABLES.include?(var)
+        tvar
+      elsif Citeproc::DATE_TOKENS.include?(var)
+        var =~ /date/ ? tvar : "date_#{tvar}"
+      else
+        # just give the variable back unmodified
+        tvar
+      end
+    end
+
+    Citeproc::VARIABLES.each do |var|
+      attr_accessor transform_variable(var).to_sym
+    end
+
+    Citeproc::DATE_TOKENS.each do |var|
+      attr_accessor transform_variable(var).to_sym
+    end
+
     attr_accessor :type
-    attr_accessor :title, :container_title, :collection_title
-    attr_accessor :publisher, :publisher_place
-    attr_accessor :event, :event_place
-    attr_accessor :pages, :version, :volume, :number_of_volumes, :issue
-    attr_accessor :medium, :status, :edition, :note, :annote, :abstract
-    attr_accessor :keyword, :number
-    attr_accessor :archive, :archive_location, :archive_place
-    attr_accessor :url, :doi, :isbn
-    attr_accessor :date_issued, :date_accessed
-    attr_accessor :contributors
-    
+
     def initialize
       @contributors = []
     end
-    
+
     def method_missing(name, *args)
       case name.to_s
       when "locator"
@@ -44,31 +55,31 @@ module CSL
         ""
       end
     end
-    
+
     def authors=(authors)
       add_contributors(authors, "author")
     end
-    
+
     def authors
       contributors("author")
     end
-    
+
     def editors=(editors)
       add_contributors(editors, "editor")
     end
-    
+
     def editors
       contributors("editor")
     end
-    
+
     def translators=(translators)
       add_contributors(translators, "translator")
     end
-    
+
     def translators
       translators("translator")
     end
-    
+
     def contributors(role = nil, sort_key = nil)
       results = @contributors.collect{|c| c if c.role and c.role == role }.compact
       if sort_key
@@ -80,19 +91,18 @@ module CSL
       end
       results
     end
-    
-    
+
     def add_contributor_name(name, role = "author")
       c = ContributingAgent.new
       c.name = name
       c.role = role
       add_contributor(c)
     end
-    
+
     def add_contributor(contributor)
       @contributors << contributor if contributor.is_a?(ContributingAgent)
     end
-    
+
     def add_contributors(contribs, role = "author")
       contribs.each do |contrib|  
         c = ContributingAgent.new
@@ -103,7 +113,7 @@ module CSL
         @contributors << c
       end
     end
-    
+
     def resolve_locator
       result = nil
       result ||= self.issue
@@ -113,7 +123,6 @@ module CSL
     end
   end
 
-  
   # Defines the Citation class
   class ContributingAgent
     attr_accessor :name, :role
@@ -122,15 +131,21 @@ module CSL
       @role = role
       @name = name
     end
-    
+
     def given_name
-      # brittle....
-      name.split(/, /)[1]
+      o = name =~ /,/ ? {:index => 1} : {:index => 0}
+      get_name(name, o)
     end
-    
+
     def family_name
-      # brittle....
-      name.split(/, /)[0]
+      o = name =~ /,/ ? {:index => 0} : {:index => -1}
+      get_name(name, o)
+    end
+
+  private
+    def get_name(name, o = {})
+      o = {:split_char => (name =~ /,/ ? ', ' : ' ')}.merge(o)
+      name.split(o[:split_char])[o[:index]] || ''
     end
   end
 

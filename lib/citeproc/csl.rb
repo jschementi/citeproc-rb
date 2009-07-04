@@ -11,11 +11,11 @@
 #  Copyright (c) 2007, Liam Magee.
 #  Licensed under the same terms as Ruby - see http://www.ruby-lang.org/en/LICENSE.txt.
 #
- 
+
 module Citeproc
-  
+
   # ---------- Modules -----------
-  
+
   # Mixin for formatting types
   module Formatting
     FORMATTING_TERMS = [
@@ -24,7 +24,7 @@ module Citeproc
         'display', 'quotes'
         ]
     attr_accessor :formatting
-    
+
     # Careful if using multiple mixins - other modules may use this too.
     # How to delegate to other method_missing methods?
     def method_missing(name, *args)
@@ -35,12 +35,12 @@ module Citeproc
       elsif formatting.has_key?(n)
         formatting[n]
       else
-				''
-       #raise NoMethodError
+        ''
+        #raise NoMethodError
       end
     end
   end
-  
+
   # Mixin for delimiter types
   module Delimiter
     DELIMITER_TERMS = [
@@ -54,28 +54,23 @@ module Citeproc
     def delimiter
       delimiters[DELIMITER_TERMS[0]]
     end
-    
+
     def delimiter=(value)
       delimiters[DELIMITER_TERMS[0]] = value
     end
-    
+
     def delimiter_precedes_last
       delimiters[DELIMITER_TERMS[1]]
     end
-    
+
     def delimiter_precedes_last=(value)
       delimiters[DELIMITER_TERMS[1]] = value
     end
-
   end
 
-  
-  
-  
-  
   # ---------- Classes -----------
 
-  
+
   # ---------- Style -----------
 
   class Style
@@ -90,17 +85,15 @@ module Citeproc
       @citation = citation
       @bibliography = bibliography
     end
-    
+
     def add_macro macro
       @macros = [] if !@macros
       @macros << macro
     end
   end
 
-  
-
   # ---------- Info classes -----------
-  
+
   class Info
     attr_accessor :authors, :categories, :contributors, :id, :links, :published, :rights, :source, :summary, :title, :updated
 
@@ -119,7 +112,7 @@ module Citeproc
     end
   end
 
-  
+
   # Handles CSL strings with language attributes
   class InfoText
     attr_accessor :text, :language
@@ -176,8 +169,7 @@ module Citeproc
     end
   end  
 
-  
-  
+
   class GroupingElement
     attr_accessor :elements
     attr_reader :names, :labels, :dates, :texts, :groups, :conditionals
