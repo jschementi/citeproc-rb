@@ -8,10 +8,10 @@ module Citeproc
   VERSION = '0.1'
 end
 
-begin
-  require 'rdf/redland'
-rescue LoadError
-end
+#begin
+#  require 'rdf/redland'
+#rescue LoadError
+#end
 
 
 require 'citeproc/csl'
@@ -25,4 +25,5 @@ require 'citeproc/filters/bibo/bibo'
 require 'citeproc/filters/bibo/bibo_input_filter'
 require 'citeproc/filters/bibo/bibo_utils'
 require 'citeproc/formatters/base_formatter'
+require 'citeproc/formatters/html_formatter'
 require 'citeproc/formatters/xhtml_formatter'

@@ -42,19 +42,15 @@ module Citeproc
 
     private
     def build(source)
-      if source.kind_of?(String)
-        @document = REXML::Document.new(open(source))
-      #oddly, it doesn't seem that StringIO is a kind_of IO
-      elsif (source.kind_of?(IO) or source.kind_of?(StringIO))
-#        puts source.read
-#        source.rewind
-        @document = REXML::Document.new(source)
+      source = open(source) if source.kind_of?(String)
+      unless source.kind_of?(IO) or source.kind_of?(StringIO)
+        raise "Source needs to be a String or IO"
       end
-      if @document.elements["style"]
-        build_style
-      elsif @document.elements["terms"]
-        build_terms
+      @document = REXML::Document.new(source)
+      unless @document.elements["style"] or document.elements["terms"]
+        raise "style or terms element not found"
       end
+      send "build_#{@document.elements['style'] || @document.elements['terms']}"
     end
     
     def build_style
